@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "install-all": "npm install",
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run build --workspace=shared && npm run build --workspace=backend && npm run build --workspace=frontend",
     "start:backend": "npm run start --workspace=backend",
     "dev:frontend": "npm run dev --workspace=frontend",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
