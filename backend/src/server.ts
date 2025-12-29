@@ -2,7 +2,12 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { createServer } from 'http';
 import { MessageType, ClientMessage, ServerMessage } from '../../shared/dist/index.js';
 import { createApp } from './app.js';
-import { handleJoinMessage, handleLeaveMessage, handleWebSocketClose } from './roomManager.js';
+import {
+  handleCreateRoomMessage,
+  handleJoinMessage,
+  handleLeaveMessage,
+  handleWebSocketClose,
+} from './roomManager.js';
 
 const app = createApp();
 const server = createServer(app);
@@ -18,6 +23,9 @@ wss.on('connection', (ws: WebSocket) => {
       const message = JSON.parse(data.toString()) as ClientMessage;
 
       switch (message.type) {
+        case MessageType.CREATE_ROOM:
+          handleCreateRoomMessage(ws, message);
+          break;
         case MessageType.JOIN:
           handleJoinMessage(ws, message);
           break;
