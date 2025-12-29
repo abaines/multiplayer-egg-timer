@@ -32,7 +32,6 @@ This is a monorepo with three packages:
 npm ci
 ```
 
-> **Note:** Use `npm ci` for reproducible builds based on package-lock.json checksums. For updating dependencies, experienced users can use `npm install`.
 
 ### Build All Packages
 
