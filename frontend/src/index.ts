@@ -117,6 +117,8 @@ function createRoom(playerId: string, playerName: string): void {
       }
     } catch (error) {
       console.error('Error processing message:', error);
+      alert('Failed to process server response. Please try again.');
+      ws.close();
     }
   };
 

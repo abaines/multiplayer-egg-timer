@@ -1,3 +1,5 @@
+import { randomInt } from 'crypto';
+
 /**
  * Generates a random 4-character room ID using confusion-resistant characters.
  * Uses uppercase letters excluding those commonly confused: I, O, L
@@ -12,7 +14,7 @@ export function generateRoomId(): string {
   const alphabetLength: number = CONFUSION_RESISTANT_ALPHABET.length;
 
   for (let i = 0; i < ROOM_ID_LENGTH; i++) {
-    const randomIndex: number = Math.floor(Math.random() * alphabetLength);
+    const randomIndex: number = randomInt(0, alphabetLength);
     roomId += CONFUSION_RESISTANT_ALPHABET[randomIndex];
   }
 

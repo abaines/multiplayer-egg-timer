@@ -28,7 +28,7 @@ function getOrCreateRoom(roomId: string): Room {
   return rooms.get(roomId) || createRoom(roomId);
 }
 
-function addPlayerToRoom(roomId: string, player: Player, ws: WebSocket): void {
+function addPlayerToRoom(roomId: string, player: Player, ws: WebSocket): Room {
   const room = getOrCreateRoom(roomId);
 
   room.players = room.players.filter((p) => p.id !== player.id);
@@ -39,6 +39,8 @@ function addPlayerToRoom(roomId: string, player: Player, ws: WebSocket): void {
   const connections = roomConnections.get(roomId) || new Set();
   connections.add(ws);
   roomConnections.set(roomId, connections);
+
+  return room;
 }
 
 function removePlayerFromRoom(roomId: string, playerId: string, ws: WebSocket): void {
@@ -81,8 +83,7 @@ export function handleCreateRoomMessage(ws: WebSocket, message: CreateRoomMessag
     joinedAt: Date.now(),
   };
 
-  addPlayerToRoom(roomId, player, ws);
-  const room = getOrCreateRoom(roomId);
+  const room = addPlayerToRoom(roomId, player, ws);
 
   const roomCreatedMessage: ServerMessage = {
     type: MessageType.ROOM_CREATED,
@@ -101,9 +102,7 @@ export function handleJoinMessage(ws: WebSocket, message: JoinMessage): void {
     joinedAt: Date.now(),
   };
 
-  addPlayerToRoom(normalizedRoomId, player, ws);
-
-  const room = getOrCreateRoom(normalizedRoomId);
+  const room = addPlayerToRoom(normalizedRoomId, player, ws);
 
   const roomStateMessage: ServerMessage = {
     type: MessageType.ROOM_STATE,
