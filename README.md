@@ -47,22 +47,13 @@ npm run start:backend
 
 The server runs on `http://localhost:3000` by default.
 
-### Run Frontend in Development Mode
-
-```bash
-npm run dev:frontend
-```
-
 ### Linting and Formatting
 
 ```bash
 # Check linting
 npm run lint
 
-# Check formatting
-npm run format:check
-
-# Auto-format code
+# Fix formatting
 npm run format
 ```
 
