@@ -21,6 +21,7 @@ app.get('/health', (_req, res) => {
 wss.on('connection', (ws: WebSocket) => {
   console.log('New WebSocket connection');
 
+  // TODO: use non-anon method (self documenting named method)
   ws.on('message', (data: Buffer) => {
     try {
       const message = JSON.parse(data.toString()) as ClientMessage;
