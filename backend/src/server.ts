@@ -10,7 +10,7 @@ import {
   ServerMessage,
   JoinMessage,
   LeaveMessage,
-} from 'shared';
+} from '../../shared/dist/index.js';
 
 // In-memory storage for rooms
 const rooms = new Map<string, Room>();
@@ -37,13 +37,13 @@ function getOrCreateRoom(roomId: string): Room {
 
 function addPlayerToRoom(roomId: string, player: Player, ws: WebSocket): void {
   const room = getOrCreateRoom(roomId);
-  
+
   // Check if player already exists, if so remove old entry
   room.players = room.players.filter((p) => p.id !== player.id);
-  
+
   room.players.push(player);
   wsToPlayer.set(ws, { roomId, playerId: player.id });
-  
+
   const connections = roomConnections.get(roomId) || new Set();
   connections.add(ws);
   roomConnections.set(roomId, connections);
