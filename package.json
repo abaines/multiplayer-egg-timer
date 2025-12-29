@@ -1,0 +1,30 @@
+{
+  "name": "multiplayer-egg-timer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Multiplayer egg timer for board games",
+  "workspaces": [
+    "frontend",
+    "backend",
+    "shared"
+  ],
+  "scripts": {
+    "install-all": "npm install",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,html}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,html}\""
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}

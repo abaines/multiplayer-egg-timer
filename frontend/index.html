@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Multiplayer Egg Timer - Join</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Multiplayer Egg Timer</h1>
+      <div class="card">
+        <h2>Join a Room</h2>
+        <form id="joinForm">
+          <div class="form-group">
+            <label for="playerName">Your Name</label>
+            <input
+              type="text"
+              id="playerName"
+              name="playerName"
+              required
+              placeholder="Enter your name"
+              autocomplete="off"
+            />
+          </div>
+          <div class="form-group">
+            <label for="roomId">Room ID</label>
+            <input
+              type="text"
+              id="roomId"
+              name="roomId"
+              required
+              placeholder="Enter room ID"
+              autocomplete="off"
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Join Room</button>
+        </form>
+      </div>
+    </div>
+    <script type="module" src="/src/index.ts"></script>
+  </body>
+</html>
