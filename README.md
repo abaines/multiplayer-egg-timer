@@ -121,7 +121,3 @@ A manual workflow is available for building and pushing to GitHub Container Regi
 4. Share the room ID with other players
 5. See participants join and leave in real-time
 
-## License
-
-MIT
-
