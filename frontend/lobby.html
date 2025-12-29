@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Multiplayer Egg Timer - Lobby</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Multiplayer Egg Timer</h1>
+      <div class="card">
+        <div class="lobby-header">
+          <h2>Room: <span id="roomId"></span></h2>
+          <button id="leaveBtn" class="btn btn-secondary">Leave Room</button>
+        </div>
+        <div class="participants">
+          <h3>Participants</h3>
+          <ul id="playerList" class="player-list"></ul>
+        </div>
+        <div class="status">
+          <p id="statusMessage" class="status-message"></p>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/lobby.ts"></script>
+  </body>
+</html>

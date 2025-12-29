@@ -1,0 +1,7 @@
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+.vite/
+*.js
+*.js.map
