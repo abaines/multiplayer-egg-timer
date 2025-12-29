@@ -8,6 +8,16 @@ const app = createApp();
 const server = createServer(app);
 const wss = new WebSocketServer({ server, path: '/ws' });
 
+// Serve static files from frontend dist
+const frontendPath = path.join(import.meta.dirname, '../../frontend/dist');
+app.use(express.static(frontendPath));
+
+// Health check endpoint
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok' });
+});
+
+// WebSocket connection handler
 wss.on('connection', (ws: WebSocket) => {
   console.log('New WebSocket connection');
 
