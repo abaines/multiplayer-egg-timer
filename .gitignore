@@ -8,6 +8,10 @@ yarn-error.log*
 dist/
 build/
 *.tsbuildinfo
+*.js
+*.js.map
+!vite.config.ts
+!*.config.js
 
 # Environment
 .env
