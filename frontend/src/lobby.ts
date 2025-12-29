@@ -59,6 +59,49 @@ function renderPlayers() {
   });
 }
 
+function handleServerMessage(event: MessageEvent) {
+  try {
+    const message = JSON.parse(event.data) as ServerMessage;
+
+    switch (message.type) {
+      case MessageType.ROOM_STATE:
+        players.clear();
+        message.room.players.forEach((player) => {
+          players.set(player.id, player);
+        });
+        renderPlayers();
+        break;
+
+      case MessageType.PLAYER_JOINED:
+        players.set(message.player.id, message.player);
+        renderPlayers();
+        break;
+
+      case MessageType.PLAYER_LEFT:
+        players.delete(message.playerId);
+        renderPlayers();
+        break;
+
+      case MessageType.ERROR:
+        updateStatus(`Error: ${message.message}`, 'disconnected');
+        break;
+
+      default:
+        throw new Error(`Unknown message type: ${JSON.stringify(message)}`);
+    }
+  } catch (error) {
+    console.error('Error processing message:', error);
+  }
+}
+
+function createLeaveMessage() {
+  return {
+    type: MessageType.LEAVE,
+    roomId: roomId!,
+    playerId: playerId!,
+  };
+}
+
 function connectWebSocket() {
   updateStatus('Connecting...', 'connecting');
 
@@ -70,7 +113,6 @@ function connectWebSocket() {
   ws.onopen = () => {
     updateStatus('Connected', 'connected');
 
-    // Send join message
     const joinMessage = {
       type: MessageType.JOIN,
       roomId: roomId!,
@@ -80,40 +122,7 @@ function connectWebSocket() {
     ws?.send(JSON.stringify(joinMessage));
   };
 
-  ws.onmessage = (event) => {
-    try {
-      const message: ServerMessage = JSON.parse(event.data);
-
-      switch (message.type) {
-        case MessageType.ROOM_STATE:
-          // Initial room state
-          players.clear();
-          message.room.players.forEach((player) => {
-            players.set(player.id, player);
-          });
-          renderPlayers();
-          break;
-
-        case MessageType.PLAYER_JOINED:
-          // Someone joined
-          players.set(message.player.id, message.player);
-          renderPlayers();
-          break;
-
-        case MessageType.PLAYER_LEFT:
-          // Someone left
-          players.delete(message.playerId);
-          renderPlayers();
-          break;
-
-        case MessageType.ERROR:
-          updateStatus(`Error: ${message.message}`, 'disconnected');
-          break;
-      }
-    } catch (error) {
-      console.error('Error processing message:', error);
-    }
-  };
+  ws.onmessage = handleServerMessage;
 
   ws.onerror = (error) => {
     console.error('WebSocket error:', error);
@@ -124,7 +133,6 @@ function connectWebSocket() {
     updateStatus('Disconnected', 'disconnected');
     ws = null;
 
-    // Attempt to reconnect after 3 seconds
     const reconnectDelay = 3000;
     setTimeout(() => {
       if (!ws) {
@@ -136,38 +144,23 @@ function connectWebSocket() {
 
 function leaveRoom() {
   if (ws && ws.readyState === WebSocket.OPEN) {
-    const leaveMessage = {
-      type: MessageType.LEAVE,
-      roomId: roomId!,
-      playerId: playerId!,
-    };
-    ws.send(JSON.stringify(leaveMessage));
+    ws.send(JSON.stringify(createLeaveMessage()));
     ws.close();
   }
 
-  // Clear session data
   sessionStorage.removeItem('roomId');
   sessionStorage.removeItem('playerName');
   sessionStorage.removeItem('playerId');
 
-  // Redirect to index
   window.location.href = '/';
 }
 
-// Event listeners
 leaveBtn.addEventListener('click', leaveRoom);
 
-// Handle page unload
 window.addEventListener('beforeunload', () => {
   if (ws && ws.readyState === WebSocket.OPEN) {
-    const leaveMessage = {
-      type: MessageType.LEAVE,
-      roomId: roomId!,
-      playerId: playerId!,
-    };
-    ws.send(JSON.stringify(leaveMessage));
+    ws.send(JSON.stringify(createLeaveMessage()));
   }
 });
 
-// Connect to WebSocket
 connectWebSocket();
