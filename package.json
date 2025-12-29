@@ -16,12 +16,12 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,html}\""
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0",
+    "@typescript-eslint/eslint-plugin": "^8.18.2",
+    "@typescript-eslint/parser": "^8.18.2",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.2.4",
-    "typescript": "^5.3.3"
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=20.0.0",
