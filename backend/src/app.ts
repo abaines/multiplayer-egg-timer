@@ -4,7 +4,7 @@ import path from 'path';
 export function createApp(): express.Application {
   const app = express();
 
-  const frontendPath = path.join(__dirname, '../../frontend/dist');
+  const frontendPath = path.join(import.meta.dirname, '../../frontend/dist');
   app.use(express.static(frontendPath));
 
   app.get('/health', (_req, res) => {
