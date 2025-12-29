@@ -125,11 +125,12 @@ function connectWebSocket() {
     ws = null;
 
     // Attempt to reconnect after 3 seconds
+    const reconnectDelay = 3000;
     setTimeout(() => {
       if (!ws) {
         connectWebSocket();
       }
-    }, 3000);
+    }, reconnectDelay);
   };
 }
 
