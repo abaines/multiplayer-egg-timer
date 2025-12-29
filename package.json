@@ -11,6 +11,8 @@
   "scripts": {
     "install-all": "npm install",
     "build": "npm run build --workspaces --if-present",
+    "start:backend": "npm run start --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,html}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,html}\""

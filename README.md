@@ -43,8 +43,7 @@ npm run build
 ### Run Backend Server
 
 ```bash
-cd backend
-npm start
+npm run start:backend
 ```
 
 The server runs on `http://localhost:3000` by default.
@@ -52,8 +51,7 @@ The server runs on `http://localhost:3000` by default.
 ### Run Frontend in Development Mode
 
 ```bash
-cd frontend
-npm run dev
+npm run dev:frontend
 ```
 
 ### Linting and Formatting
