@@ -13,6 +13,10 @@ build/
 !vite.config.ts
 !*.config.js
 
+# Auto-generated version files
+backend/src/version.ts
+frontend/src/version.ts
+
 # Environment
 .env
 .env.local

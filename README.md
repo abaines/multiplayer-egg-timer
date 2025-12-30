@@ -111,3 +111,55 @@ A manual workflow is available for building and pushing to GitHub Container Regi
 4. Share the room ID with other players
 5. See participants join and leave in real-time
 
+## Version Information & QA Verification
+
+The application includes build-time version information for both frontend and backend.
+This helps QA and power users verify which version is deployed.
+
+### How to Check Versions
+
+**Frontend (In Browser):**
+1. Open the browser's developer console (F12)
+2. Version information is automatically logged on page load with:
+   - Git SHA and branch
+   - Build timestamp
+   - Backend version comparison
+
+**Backend Health Endpoint:**
+```bash
+curl http://localhost:3000/health
+```
+
+Returns JSON with version info:
+```json
+{
+  "status": "ok",
+  "version": {
+    "buildTime": "2025-12-30T04:25:42.619Z",
+    "gitSha": "b252fa1788157e29deeaa7dfb3a4409ec424e277",
+    "gitShortSha": "b252fa1",
+    "gitBranch": "copilot/remember-user-name-room-id"
+  }
+}
+```
+
+**Hidden in HTML (for automation):**
+The frontend HTML includes data attributes:
+```html
+<body data-version="b252fa1" data-build-time="2025-12-30T04:25:42.639Z">
+```
+
+### Common Practices for Version Display
+
+1. **Console Logging** (Implemented): Automatic version info in browser console on page load
+2. **Health/Version Endpoint** (Implemented): `/health` endpoint with version metadata
+3. **HTML Meta/Data Attributes** (Implemented): Hidden in DOM for test automation
+4. **UI Footer/About Modal**: Optional - add visible version in UI footer
+5. **DevTools Panel**: Optional - create custom DevTools panel for debugging
+6. **`__version` Global**: Optional - expose `window.__version` for programmatic access
+
+### Version Mismatch Detection
+
+The frontend automatically checks if it matches the backend version on load.
+If versions differ, a warning is logged to the console to help identify deployment issues.
+
