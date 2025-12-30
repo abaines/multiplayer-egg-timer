@@ -1,44 +1,5 @@
 import { MessageType, ServerMessage } from 'shared';
-import { VERSION_INFO } from './version.js';
-
-// Version checking and logging
-async function checkVersions(): Promise<void> {
-  try {
-    // Get frontend version from data attributes
-    const frontendVersion = document.body.dataset.version || 'unknown';
-    const frontendBuildTime = document.body.dataset.buildTime || 'unknown';
-    
-    console.group('🔍 Version Information');
-    console.log('%c Frontend', 'font-weight: bold; color: #0066cc');
-    console.log('  Version:', frontendVersion);
-    console.log('  Build Time:', frontendBuildTime);
-    console.log('  Git SHA:', VERSION_INFO.gitSha);
-    console.log('  Branch:', VERSION_INFO.gitBranch);
-    
-    // Fetch backend version
-    const response = await fetch('/health');
-    if (response.ok) {
-      const healthData = await response.json();
-      console.log('%c Backend', 'font-weight: bold; color: #009933');
-      console.log('  Version:', healthData.version.gitShortSha);
-      console.log('  Build Time:', healthData.version.buildTime);
-      console.log('  Git SHA:', healthData.version.gitSha);
-      console.log('  Branch:', healthData.version.gitBranch);
-      console.log('  Status:', healthData.status);
-      
-      // Check if versions match
-      if (healthData.version.gitSha !== VERSION_INFO.gitSha) {
-        console.warn('%c⚠️ Version Mismatch', 'font-weight: bold; color: #ff9900');
-        console.warn('  Frontend and backend are running different versions!');
-      } else {
-        console.log('%c✓ Versions match', 'color: #009933');
-      }
-    }
-    console.groupEnd();
-  } catch (error) {
-    console.error('Failed to check backend version:', error);
-  }
-}
+import { checkVersions } from './versionChecker.js';
 
 // Check versions on load
 checkVersions();
