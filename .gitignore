@@ -10,8 +10,6 @@ build/
 *.tsbuildinfo
 *.js
 *.js.map
-!vite.config.ts
-!*.config.js
 !scripts/*.js
 
 # Auto-generated version files
