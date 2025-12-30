@@ -12,6 +12,7 @@ COPY frontend/package*.json ./frontend/
 RUN npm ci
 
 # Copy all source code
+COPY scripts/ ./scripts/
 COPY shared/ ./shared/
 COPY backend/ ./backend/
 COPY frontend/ ./frontend/
