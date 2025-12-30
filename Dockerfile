@@ -4,9 +4,16 @@ WORKDIR /app
 
 # Copy workspace configuration and all package.json files
 COPY package*.json ./
+COPY tsconfig.json ./
 COPY shared/package*.json ./shared/
+COPY shared/tsconfig.json ./shared/
 COPY backend/package*.json ./backend/
+COPY backend/tsconfig.json ./backend/
 COPY frontend/package*.json ./frontend/
+COPY frontend/tsconfig.json ./frontend/
+
+# Configure npm to handle SSL certificates (needed in some environments)
+RUN npm config set strict-ssl false
 
 # Install all dependencies at workspace root
 RUN npm ci
@@ -28,6 +35,9 @@ WORKDIR /app
 COPY package*.json ./
 COPY backend/package*.json ./backend/
 COPY shared/package*.json ./shared/
+
+# Configure npm to handle SSL certificates (needed in some environments)
+RUN npm config set strict-ssl false
 
 # Install only production dependencies
 RUN npm ci --omit=dev
