@@ -148,6 +148,7 @@ function leaveRoom() {
     ws.close();
   }
 
+  // Clear session storage but keep playerId in localStorage
   sessionStorage.removeItem('roomId');
   sessionStorage.removeItem('playerName');
   sessionStorage.removeItem('playerId');

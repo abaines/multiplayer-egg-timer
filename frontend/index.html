@@ -6,7 +6,7 @@
     <title>Multiplayer Egg Timer - Join</title>
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
-  <body>
+  <body data-version="__VERSION__" data-build-time="__BUILD_TIME__">
     <div class="container">
       <h1>Multiplayer Egg Timer</h1>
       <div class="card">
@@ -24,17 +24,16 @@
             />
           </div>
           <div class="form-group">
-            <label for="roomId">Room ID</label>
+            <label for="roomId">Room ID (optional)</label>
             <input
               type="text"
               id="roomId"
               name="roomId"
-              required
-              placeholder="Enter room ID"
+              placeholder="Enter room ID or leave empty to create new room"
               autocomplete="off"
             />
           </div>
-          <button type="submit" class="btn btn-primary">Join Room</button>
+          <button type="submit" id="submitBtn" class="btn btn-primary">Create Room</button>
         </form>
       </div>
     </div>

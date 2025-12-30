@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'path';
+import { VERSION_INFO } from 'shared';
 
 export function createApp(): express.Application {
   const app = express();
@@ -8,7 +9,10 @@ export function createApp(): express.Application {
   app.use(express.static(frontendPath));
 
   app.get('/health', (_req, res) => {
-    res.json({ status: 'ok' });
+    res.json({
+      status: 'ok',
+      version: VERSION_INFO,
+    });
   });
 
   return app;

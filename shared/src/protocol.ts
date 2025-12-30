@@ -13,8 +13,10 @@ export interface Room {
 
 // WebSocket message types
 export enum MessageType {
+  CREATE_ROOM = 'create_room',
   JOIN = 'join',
   LEAVE = 'leave',
+  ROOM_CREATED = 'room_created',
   PLAYER_JOINED = 'player_joined',
   PLAYER_LEFT = 'player_left',
   ROOM_STATE = 'room_state',
@@ -54,8 +56,21 @@ export interface ErrorMessage {
   message: string;
 }
 
-export type ClientMessage = JoinMessage | LeaveMessage;
+export interface CreateRoomMessage {
+  type: MessageType.CREATE_ROOM;
+  playerId: string;
+  playerName: string;
+}
+
+export interface RoomCreatedMessage {
+  type: MessageType.ROOM_CREATED;
+  roomId: string;
+  room: Room;
+}
+
+export type ClientMessage = CreateRoomMessage | JoinMessage | LeaveMessage;
 export type ServerMessage =
+  | RoomCreatedMessage
   | PlayerJoinedMessage
   | PlayerLeftMessage
   | RoomStateMessage

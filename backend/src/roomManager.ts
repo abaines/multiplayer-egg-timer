@@ -6,7 +6,9 @@ import {
   ServerMessage,
   JoinMessage,
   LeaveMessage,
+  CreateRoomMessage,
 } from '../../shared/dist/index.js';
+import { generateRoomId, normalizeRoomId } from './roomIdGenerator.js';
 
 const rooms = new Map<string, Room>();
 const wsToPlayer = new Map<WebSocket, { roomId: string; playerId: string }>();
@@ -26,7 +28,7 @@ function getOrCreateRoom(roomId: string): Room {
   return rooms.get(roomId) || createRoom(roomId);
 }
 
-function addPlayerToRoom(roomId: string, player: Player, ws: WebSocket): void {
+function addPlayerToRoom(roomId: string, player: Player, ws: WebSocket): Room {
   const room = getOrCreateRoom(roomId);
 
   room.players = room.players.filter((p) => p.id !== player.id);
@@ -37,6 +39,8 @@ function addPlayerToRoom(roomId: string, player: Player, ws: WebSocket): void {
   const connections = roomConnections.get(roomId) || new Set();
   connections.add(ws);
   roomConnections.set(roomId, connections);
+
+  return room;
 }
 
 function removePlayerFromRoom(roomId: string, playerId: string, ws: WebSocket): void {
@@ -70,16 +74,35 @@ function broadcastToRoom(roomId: string, message: ServerMessage, exclude?: WebSo
   });
 }
 
-export function handleJoinMessage(ws: WebSocket, message: JoinMessage): void {
+export function handleCreateRoomMessage(ws: WebSocket, message: CreateRoomMessage): void {
+  const roomId = generateRoomId();
+
   const player: Player = {
     id: message.playerId,
     name: message.playerName,
     joinedAt: Date.now(),
   };
 
-  addPlayerToRoom(message.roomId, player, ws);
+  const room = addPlayerToRoom(roomId, player, ws);
 
-  const room = getOrCreateRoom(message.roomId);
+  const roomCreatedMessage: ServerMessage = {
+    type: MessageType.ROOM_CREATED,
+    roomId,
+    room,
+  };
+  ws.send(JSON.stringify(roomCreatedMessage));
+}
+
+export function handleJoinMessage(ws: WebSocket, message: JoinMessage): void {
+  const normalizedRoomId = normalizeRoomId(message.roomId);
+
+  const player: Player = {
+    id: message.playerId,
+    name: message.playerName,
+    joinedAt: Date.now(),
+  };
+
+  const room = addPlayerToRoom(normalizedRoomId, player, ws);
 
   const roomStateMessage: ServerMessage = {
     type: MessageType.ROOM_STATE,
@@ -91,17 +114,18 @@ export function handleJoinMessage(ws: WebSocket, message: JoinMessage): void {
     type: MessageType.PLAYER_JOINED,
     player,
   };
-  broadcastToRoom(message.roomId, playerJoinedMessage, ws);
+  broadcastToRoom(normalizedRoomId, playerJoinedMessage, ws);
 }
 
 export function handleLeaveMessage(ws: WebSocket, message: LeaveMessage): void {
-  removePlayerFromRoom(message.roomId, message.playerId, ws);
+  const normalizedRoomId = normalizeRoomId(message.roomId);
+  removePlayerFromRoom(normalizedRoomId, message.playerId, ws);
 
   const playerLeftMessage: ServerMessage = {
     type: MessageType.PLAYER_LEFT,
     playerId: message.playerId,
   };
-  broadcastToRoom(message.roomId, playerLeftMessage);
+  broadcastToRoom(normalizedRoomId, playerLeftMessage);
 }
 
 export function handleWebSocketClose(ws: WebSocket): void {

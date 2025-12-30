@@ -2,6 +2,7 @@
   "name": "multiplayer-egg-timer",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "Multiplayer egg timer for board games",
   "workspaces": [
     "frontend",
@@ -10,7 +11,8 @@
   ],
   "scripts": {
     "install-all": "npm install",
-    "build": "npm run build:shared && npm run build:backend && npm run build:frontend",
+    "generate-version": "node scripts/generate-version.js",
+    "build": "npm run generate-version && npm run build:shared && npm run build:backend && npm run build:frontend",
     "build:shared": "npm run build --workspace=shared",
     "build:backend": "npm run build --workspace=backend",
     "build:frontend": "npm run build --workspace=frontend",
