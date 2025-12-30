@@ -1,6 +1,6 @@
 import express from 'express';
 import path from 'path';
-import { VERSION_INFO } from './version.js';
+import { VERSION_INFO } from 'shared';
 
 export function createApp(): express.Application {
   const app = express();

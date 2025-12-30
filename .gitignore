@@ -15,8 +15,7 @@ build/
 !scripts/*.js
 
 # Auto-generated version files
-backend/src/version.ts
-frontend/src/version.ts
+shared/src/version.ts
 
 # Environment
 .env

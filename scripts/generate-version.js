@@ -48,34 +48,20 @@ function generateVersionInfo() {
   };
 }
 
-// Generate for backend
-const backendVersion = generateVersionInfo();
-const backendOutput = `// Auto-generated file - do not edit manually
+// Generate in shared folder for both frontend and backend to use
+const versionInfo = generateVersionInfo();
+const versionOutput = `// Auto-generated file - do not edit manually
 // Generated at build time by scripts/generate-version.js
 
-export const VERSION_INFO = ${JSON.stringify(backendVersion, null, 2)} as const;
+export const VERSION_INFO = ${JSON.stringify(versionInfo, null, 2)} as const;
 `;
 
 writeFileSync(
-  join(__dirname, '../backend/src/version.ts'),
-  backendOutput,
-  'utf-8'
-);
-
-// Generate for frontend
-const frontendVersion = generateVersionInfo();
-const frontendOutput = `// Auto-generated file - do not edit manually
-// Generated at build time by scripts/generate-version.js
-
-export const VERSION_INFO = ${JSON.stringify(frontendVersion, null, 2)} as const;
-`;
-
-writeFileSync(
-  join(__dirname, '../frontend/src/version.ts'),
-  frontendOutput,
+  join(__dirname, '../shared/src/version.ts'),
+  versionOutput,
   'utf-8'
 );
 
 console.log('✓ Version info generated successfully');
-console.log(`  Git SHA: ${backendVersion.gitShortSha} (${backendVersion.gitBranch})`);
-console.log(`  Build time: ${backendVersion.buildTime}`);
+console.log(`  Git SHA: ${versionInfo.gitShortSha} (${versionInfo.gitBranch})`);
+console.log(`  Build time: ${versionInfo.buildTime}`);

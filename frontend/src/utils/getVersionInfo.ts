@@ -20,16 +20,18 @@ export interface VersionInfo {
  */
 export function getVersionInfo(baseDir: string): VersionInfo | null {
   try {
-    const versionFile = path.resolve(baseDir, 'src/version.ts');
+    const versionFile = path.resolve(baseDir, '../shared/src/version.ts');
     const versionContent = readFileSync(versionFile, 'utf-8');
     const versionMatch = versionContent.match(/export const VERSION_INFO = ({[\s\S]*?}) as const;/);
 
     if (versionMatch) {
-      const parsed = JSON.parse(versionMatch[1]);
+      const parsed = JSON.parse(versionMatch[1]) as unknown;
       // Validate the parsed object has the expected structure
       if (
         parsed &&
         typeof parsed === 'object' &&
+        'gitShortSha' in parsed &&
+        'buildTime' in parsed &&
         typeof parsed.gitShortSha === 'string' &&
         typeof parsed.buildTime === 'string'
       ) {
