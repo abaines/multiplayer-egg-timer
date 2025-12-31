@@ -4,14 +4,19 @@ WORKDIR /app
 
 # Copy workspace configuration and all package.json files
 COPY package*.json ./
+COPY tsconfig.json ./
 COPY shared/package*.json ./shared/
+COPY shared/tsconfig.json ./shared/
 COPY backend/package*.json ./backend/
+COPY backend/tsconfig.json ./backend/
 COPY frontend/package*.json ./frontend/
+COPY frontend/tsconfig.json ./frontend/
 
 # Install all dependencies at workspace root
 RUN npm ci
 
 # Copy all source code
+COPY scripts/ ./scripts/
 COPY shared/ ./shared/
 COPY backend/ ./backend/
 COPY frontend/ ./frontend/
