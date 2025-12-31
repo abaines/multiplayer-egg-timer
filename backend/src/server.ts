@@ -1,13 +1,7 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { createServer } from 'http';
-import { MessageType, ClientMessage, ServerMessage } from '../../shared/dist/index.js';
 import { createApp } from './app.js';
-import {
-  handleCreateRoomMessage,
-  handleJoinMessage,
-  handleLeaveMessage,
-  handleWebSocketClose,
-} from './roomManager.js';
+import { handleMessage, handleWebSocketClose } from './roomManager.js';
 
 const app = createApp();
 const server = createServer(app);
@@ -17,32 +11,8 @@ const wss = new WebSocketServer({ server, path: '/ws' });
 wss.on('connection', (ws: WebSocket) => {
   console.log('New WebSocket connection');
 
-  // TODO: use non-anon method (self documenting named method)
   ws.on('message', (data: Buffer) => {
-    try {
-      const message = JSON.parse(data.toString()) as ClientMessage;
-
-      switch (message.type) {
-        case MessageType.CREATE_ROOM:
-          handleCreateRoomMessage(ws, message);
-          break;
-        case MessageType.JOIN:
-          handleJoinMessage(ws, message);
-          break;
-        case MessageType.LEAVE:
-          handleLeaveMessage(ws, message);
-          break;
-        default:
-          throw new Error(`Unknown message type: ${JSON.stringify(message)}`);
-      }
-    } catch (error) {
-      console.error('Error processing message:', error);
-      const errorMessage: ServerMessage = {
-        type: MessageType.ERROR,
-        message: 'Invalid message format',
-      };
-      ws.send(JSON.stringify(errorMessage));
-    }
+    handleMessage(ws, data);
   });
 
   ws.on('close', () => {

@@ -2,11 +2,18 @@ import { WebSocket } from 'ws';
 import {
   Player,
   Room,
+  GameState,
   MessageType,
   ServerMessage,
+  ClientMessage,
   JoinMessage,
   LeaveMessage,
   CreateRoomMessage,
+  StartMessage,
+  PauseMessage,
+  ResumeMessage,
+  StopMessage,
+  EndTurnMessage,
 } from '../../shared/dist/index.js';
 import { generateRoomId, normalizeRoomId } from './roomIdGenerator.js';
 
@@ -18,6 +25,10 @@ function createRoom(roomId: string): Room {
   const room: Room = {
     id: roomId,
     players: [],
+    gameState: GameState.STOPPED,
+    playerTotals: {},
+    anchorTime: null,
+    accruedPausedTime: 0,
   };
   rooms.set(roomId, room);
   roomConnections.set(roomId, new Set());
@@ -35,6 +46,11 @@ function addPlayerToRoom(roomId: string, player: Player, ws: WebSocket): Room {
 
   room.players.push(player);
   wsToPlayer.set(ws, { roomId, playerId: player.id });
+
+  // Initialize player total if not exists
+  if (!(player.id in room.playerTotals)) {
+    room.playerTotals[player.id] = 0;
+  }
 
   const connections = roomConnections.get(roomId) || new Set();
   connections.add(ws);
@@ -72,6 +88,40 @@ function broadcastToRoom(roomId: string, message: ServerMessage, exclude?: WebSo
       client.send(messageStr);
     }
   });
+}
+
+function sendError(ws: WebSocket, message: string): void {
+  const errorMessage: ServerMessage = {
+    type: MessageType.ERROR,
+    message,
+  };
+  ws.send(JSON.stringify(errorMessage));
+}
+
+function validateRoomAndPlayer(
+  ws: WebSocket,
+  roomId: string
+): { room: Room; playerId: string } | null {
+  const normalizedRoomId = normalizeRoomId(roomId);
+  const room = rooms.get(normalizedRoomId);
+
+  if (!room) {
+    sendError(ws, 'Room not found');
+    return null;
+  }
+
+  const playerInfo = wsToPlayer.get(ws);
+  if (!playerInfo) {
+    sendError(ws, 'Player not connected');
+    return null;
+  }
+
+  if (playerInfo.roomId !== normalizedRoomId) {
+    sendError(ws, 'Player not in this room');
+    return null;
+  }
+
+  return { room, playerId: playerInfo.playerId };
 }
 
 export function handleCreateRoomMessage(ws: WebSocket, message: CreateRoomMessage): void {
@@ -138,5 +188,168 @@ export function handleWebSocketClose(ws: WebSocket): void {
       playerId: playerInfo.playerId,
     };
     broadcastToRoom(playerInfo.roomId, playerLeftMessage);
+  }
+}
+
+export function handleStartMessage(ws: WebSocket, message: StartMessage): void {
+  const validated = validateRoomAndPlayer(ws, message.roomId);
+  if (!validated) return;
+
+  const { room } = validated;
+  const normalizedRoomId = normalizeRoomId(message.roomId);
+
+  if (room.gameState !== GameState.STOPPED) {
+    sendError(ws, `Cannot start timer: current state is ${room.gameState}`);
+    return;
+  }
+
+  room.gameState = GameState.RUNNING;
+  room.anchorTime = Date.now();
+  room.accruedPausedTime = 0;
+
+  const timerStateUpdate: ServerMessage = {
+    type: MessageType.TIMER_STATE_UPDATE,
+    room,
+  };
+  broadcastToRoom(normalizedRoomId, timerStateUpdate);
+}
+
+export function handlePauseMessage(ws: WebSocket, message: PauseMessage): void {
+  const validated = validateRoomAndPlayer(ws, message.roomId);
+  if (!validated) return;
+
+  const { room } = validated;
+  const normalizedRoomId = normalizeRoomId(message.roomId);
+
+  if (room.gameState !== GameState.RUNNING) {
+    sendError(ws, `Cannot pause timer: current state is ${room.gameState}`);
+    return;
+  }
+
+  // Calculate time since anchor and add to accrued paused time
+  if (room.anchorTime !== null) {
+    const elapsed = Date.now() - room.anchorTime;
+    room.accruedPausedTime += elapsed;
+  }
+
+  room.gameState = GameState.PAUSED;
+  room.anchorTime = null;
+
+  const timerStateUpdate: ServerMessage = {
+    type: MessageType.TIMER_STATE_UPDATE,
+    room,
+  };
+  broadcastToRoom(normalizedRoomId, timerStateUpdate);
+}
+
+export function handleResumeMessage(ws: WebSocket, message: ResumeMessage): void {
+  const validated = validateRoomAndPlayer(ws, message.roomId);
+  if (!validated) return;
+
+  const { room } = validated;
+  const normalizedRoomId = normalizeRoomId(message.roomId);
+
+  if (room.gameState !== GameState.PAUSED) {
+    sendError(ws, `Cannot resume timer: current state is ${room.gameState}`);
+    return;
+  }
+
+  room.gameState = GameState.RUNNING;
+  room.anchorTime = Date.now();
+
+  const timerStateUpdate: ServerMessage = {
+    type: MessageType.TIMER_STATE_UPDATE,
+    room,
+  };
+  broadcastToRoom(normalizedRoomId, timerStateUpdate);
+}
+
+export function handleStopMessage(ws: WebSocket, message: StopMessage): void {
+  const validated = validateRoomAndPlayer(ws, message.roomId);
+  if (!validated) return;
+
+  const { room } = validated;
+  const normalizedRoomId = normalizeRoomId(message.roomId);
+
+  room.gameState = GameState.STOPPED;
+  room.anchorTime = null;
+  room.accruedPausedTime = 0;
+
+  const timerStateUpdate: ServerMessage = {
+    type: MessageType.TIMER_STATE_UPDATE,
+    room,
+  };
+  broadcastToRoom(normalizedRoomId, timerStateUpdate);
+}
+
+export function handleEndTurnMessage(ws: WebSocket, message: EndTurnMessage): void {
+  const validated = validateRoomAndPlayer(ws, message.roomId);
+  if (!validated) return;
+
+  const { room, playerId } = validated;
+  const normalizedRoomId = normalizeRoomId(message.roomId);
+
+  if (room.gameState !== GameState.RUNNING) {
+    sendError(ws, `Cannot end turn: current state is ${room.gameState}`);
+    return;
+  }
+
+  // Calculate total time for this turn
+  let turnDuration = 0;
+  if (room.anchorTime !== null) {
+    turnDuration = Date.now() - room.anchorTime;
+  }
+  turnDuration += room.accruedPausedTime;
+
+  // Add to player's total
+  const currentTotal = room.playerTotals[playerId] || 0;
+  room.playerTotals[playerId] = currentTotal + turnDuration;
+
+  // Reset for next turn
+  room.accruedPausedTime = 0;
+  room.anchorTime = Date.now();
+
+  const timerStateUpdate: ServerMessage = {
+    type: MessageType.TIMER_STATE_UPDATE,
+    room,
+  };
+  broadcastToRoom(normalizedRoomId, timerStateUpdate);
+}
+
+export function handleMessage(ws: WebSocket, data: Buffer): void {
+  try {
+    const message = JSON.parse(data.toString()) as ClientMessage;
+
+    switch (message.type) {
+      case MessageType.CREATE_ROOM:
+        handleCreateRoomMessage(ws, message);
+        break;
+      case MessageType.JOIN:
+        handleJoinMessage(ws, message);
+        break;
+      case MessageType.LEAVE:
+        handleLeaveMessage(ws, message);
+        break;
+      case MessageType.START:
+        handleStartMessage(ws, message);
+        break;
+      case MessageType.PAUSE:
+        handlePauseMessage(ws, message);
+        break;
+      case MessageType.RESUME:
+        handleResumeMessage(ws, message);
+        break;
+      case MessageType.STOP:
+        handleStopMessage(ws, message);
+        break;
+      case MessageType.END_TURN:
+        handleEndTurnMessage(ws, message);
+        break;
+      default:
+        throw new Error(`Unknown message type: ${JSON.stringify(message)}`);
+    }
+  } catch (error) {
+    console.error('Error processing message:', error);
+    sendError(ws, 'Invalid message format');
   }
 }

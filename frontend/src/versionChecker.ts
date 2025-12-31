@@ -16,8 +16,13 @@ export async function checkVersions(): Promise<void> {
     // Fetch backend version
     const response: Response = await fetch('/health');
     if (response.ok) {
-      const healthData = await response.json() as unknown;
-      if (!healthData || typeof healthData !== 'object' || !('version' in healthData) || !('status' in healthData)) {
+      const healthData = (await response.json()) as unknown;
+      if (
+        !healthData ||
+        typeof healthData !== 'object' ||
+        !('version' in healthData) ||
+        !('status' in healthData)
+      ) {
         console.error('Invalid health response format');
         console.groupEnd();
         return;

@@ -56,11 +56,7 @@ const versionOutput = `// Auto-generated file - do not edit manually
 export const VERSION_INFO = ${JSON.stringify(versionInfo, null, 2)} as const;
 `;
 
-writeFileSync(
-  join(__dirname, '../shared/src/version.ts'),
-  versionOutput,
-  'utf-8'
-);
+writeFileSync(join(__dirname, '../shared/src/version.ts'), versionOutput, 'utf-8');
 
 console.log('✓ Version info generated successfully');
 console.log(`  Git SHA: ${versionInfo.gitShortSha} (${versionInfo.gitBranch})`);
