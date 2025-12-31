@@ -12,14 +12,6 @@ COPY backend/tsconfig.json ./backend/
 COPY frontend/package*.json ./frontend/
 COPY frontend/tsconfig.json ./frontend/
 
-# Configure npm to handle SSL certificates (needed in some environments)
-# NOTE: This is required due to SSL certificate chain issues in certain build environments.
-# For production use, consider:
-# - Installing proper CA certificates
-# - Using a private npm registry with valid certificates
-# - Passing custom certificates via build args
-RUN npm config set strict-ssl false
-
 # Install all dependencies at workspace root
 RUN npm ci
 
@@ -40,14 +32,6 @@ WORKDIR /app
 COPY package*.json ./
 COPY backend/package*.json ./backend/
 COPY shared/package*.json ./shared/
-
-# Configure npm to handle SSL certificates (needed in some environments)
-# NOTE: This is required due to SSL certificate chain issues in certain build environments.
-# For production use, consider:
-# - Installing proper CA certificates
-# - Using a private npm registry with valid certificates
-# - Passing custom certificates via build args
-RUN npm config set strict-ssl false
 
 # Install only production dependencies
 RUN npm ci --omit=dev
