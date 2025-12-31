@@ -156,6 +156,10 @@ export function handleWebSocketClose(ws: WebSocket): void {
   }
 }
 
+function isPlayerInRoom(room: Room, playerId: string): boolean {
+  return room.players.some((p) => p.id === playerId);
+}
+
 export function handleStartMessage(ws: WebSocket, message: StartMessage): void {
   const normalizedRoomId = normalizeRoomId(message.roomId);
   const room = rooms.get(normalizedRoomId);
@@ -164,6 +168,15 @@ export function handleStartMessage(ws: WebSocket, message: StartMessage): void {
     const errorMessage: ServerMessage = {
       type: MessageType.ERROR,
       message: 'Room not found',
+    };
+    ws.send(JSON.stringify(errorMessage));
+    return;
+  }
+
+  if (!isPlayerInRoom(room, message.playerId)) {
+    const errorMessage: ServerMessage = {
+      type: MessageType.ERROR,
+      message: 'Player not in room',
     };
     ws.send(JSON.stringify(errorMessage));
     return;
@@ -197,6 +210,15 @@ export function handlePauseMessage(ws: WebSocket, message: PauseMessage): void {
     const errorMessage: ServerMessage = {
       type: MessageType.ERROR,
       message: 'Room not found',
+    };
+    ws.send(JSON.stringify(errorMessage));
+    return;
+  }
+
+  if (!isPlayerInRoom(room, message.playerId)) {
+    const errorMessage: ServerMessage = {
+      type: MessageType.ERROR,
+      message: 'Player not in room',
     };
     ws.send(JSON.stringify(errorMessage));
     return;
@@ -240,6 +262,15 @@ export function handleResumeMessage(ws: WebSocket, message: ResumeMessage): void
     return;
   }
 
+  if (!isPlayerInRoom(room, message.playerId)) {
+    const errorMessage: ServerMessage = {
+      type: MessageType.ERROR,
+      message: 'Player not in room',
+    };
+    ws.send(JSON.stringify(errorMessage));
+    return;
+  }
+
   if (room.gameState !== GameState.PAUSED) {
     const errorMessage: ServerMessage = {
       type: MessageType.ERROR,
@@ -272,6 +303,15 @@ export function handleStopMessage(ws: WebSocket, message: StopMessage): void {
     return;
   }
 
+  if (!isPlayerInRoom(room, message.playerId)) {
+    const errorMessage: ServerMessage = {
+      type: MessageType.ERROR,
+      message: 'Player not in room',
+    };
+    ws.send(JSON.stringify(errorMessage));
+    return;
+  }
+
   room.gameState = GameState.STOPPED;
   room.anchorTime = null;
   room.accruedPausedTime = 0;
@@ -291,6 +331,15 @@ export function handleEndTurnMessage(ws: WebSocket, message: EndTurnMessage): vo
     const errorMessage: ServerMessage = {
       type: MessageType.ERROR,
       message: 'Room not found',
+    };
+    ws.send(JSON.stringify(errorMessage));
+    return;
+  }
+
+  if (!isPlayerInRoom(room, message.playerId)) {
+    const errorMessage: ServerMessage = {
+      type: MessageType.ERROR,
+      message: 'Player not in room',
     };
     ws.send(JSON.stringify(errorMessage));
     return;
