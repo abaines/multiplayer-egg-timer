@@ -5,6 +5,7 @@ import {
   GameState,
   MessageType,
   ServerMessage,
+  ClientMessage,
   JoinMessage,
   LeaveMessage,
   CreateRoomMessage,
@@ -89,6 +90,40 @@ function broadcastToRoom(roomId: string, message: ServerMessage, exclude?: WebSo
   });
 }
 
+function sendError(ws: WebSocket, message: string): void {
+  const errorMessage: ServerMessage = {
+    type: MessageType.ERROR,
+    message,
+  };
+  ws.send(JSON.stringify(errorMessage));
+}
+
+function validateRoomAndPlayer(
+  ws: WebSocket,
+  roomId: string
+): { room: Room; playerId: string } | null {
+  const normalizedRoomId = normalizeRoomId(roomId);
+  const room = rooms.get(normalizedRoomId);
+
+  if (!room) {
+    sendError(ws, 'Room not found');
+    return null;
+  }
+
+  const playerInfo = wsToPlayer.get(ws);
+  if (!playerInfo) {
+    sendError(ws, 'Player not connected');
+    return null;
+  }
+
+  if (playerInfo.roomId !== normalizedRoomId) {
+    sendError(ws, 'Player not in this room');
+    return null;
+  }
+
+  return { room, playerId: playerInfo.playerId };
+}
+
 export function handleCreateRoomMessage(ws: WebSocket, message: CreateRoomMessage): void {
   const roomId = generateRoomId();
 
@@ -156,38 +191,15 @@ export function handleWebSocketClose(ws: WebSocket): void {
   }
 }
 
-function isPlayerInRoom(room: Room, playerId: string): boolean {
-  return room.players.some((p) => p.id === playerId);
-}
-
 export function handleStartMessage(ws: WebSocket, message: StartMessage): void {
+  const validated = validateRoomAndPlayer(ws, message.roomId);
+  if (!validated) return;
+
+  const { room } = validated;
   const normalizedRoomId = normalizeRoomId(message.roomId);
-  const room = rooms.get(normalizedRoomId);
-
-  if (!room) {
-    const errorMessage: ServerMessage = {
-      type: MessageType.ERROR,
-      message: 'Room not found',
-    };
-    ws.send(JSON.stringify(errorMessage));
-    return;
-  }
-
-  if (!isPlayerInRoom(room, message.playerId)) {
-    const errorMessage: ServerMessage = {
-      type: MessageType.ERROR,
-      message: 'Player not in room',
-    };
-    ws.send(JSON.stringify(errorMessage));
-    return;
-  }
 
   if (room.gameState !== GameState.STOPPED) {
-    const errorMessage: ServerMessage = {
-      type: MessageType.ERROR,
-      message: `Cannot start timer: current state is ${room.gameState}`,
-    };
-    ws.send(JSON.stringify(errorMessage));
+    sendError(ws, `Cannot start timer: current state is ${room.gameState}`);
     return;
   }
 
@@ -203,33 +215,14 @@ export function handleStartMessage(ws: WebSocket, message: StartMessage): void {
 }
 
 export function handlePauseMessage(ws: WebSocket, message: PauseMessage): void {
+  const validated = validateRoomAndPlayer(ws, message.roomId);
+  if (!validated) return;
+
+  const { room } = validated;
   const normalizedRoomId = normalizeRoomId(message.roomId);
-  const room = rooms.get(normalizedRoomId);
-
-  if (!room) {
-    const errorMessage: ServerMessage = {
-      type: MessageType.ERROR,
-      message: 'Room not found',
-    };
-    ws.send(JSON.stringify(errorMessage));
-    return;
-  }
-
-  if (!isPlayerInRoom(room, message.playerId)) {
-    const errorMessage: ServerMessage = {
-      type: MessageType.ERROR,
-      message: 'Player not in room',
-    };
-    ws.send(JSON.stringify(errorMessage));
-    return;
-  }
 
   if (room.gameState !== GameState.RUNNING) {
-    const errorMessage: ServerMessage = {
-      type: MessageType.ERROR,
-      message: `Cannot pause timer: current state is ${room.gameState}`,
-    };
-    ws.send(JSON.stringify(errorMessage));
+    sendError(ws, `Cannot pause timer: current state is ${room.gameState}`);
     return;
   }
 
@@ -250,33 +243,14 @@ export function handlePauseMessage(ws: WebSocket, message: PauseMessage): void {
 }
 
 export function handleResumeMessage(ws: WebSocket, message: ResumeMessage): void {
+  const validated = validateRoomAndPlayer(ws, message.roomId);
+  if (!validated) return;
+
+  const { room } = validated;
   const normalizedRoomId = normalizeRoomId(message.roomId);
-  const room = rooms.get(normalizedRoomId);
-
-  if (!room) {
-    const errorMessage: ServerMessage = {
-      type: MessageType.ERROR,
-      message: 'Room not found',
-    };
-    ws.send(JSON.stringify(errorMessage));
-    return;
-  }
-
-  if (!isPlayerInRoom(room, message.playerId)) {
-    const errorMessage: ServerMessage = {
-      type: MessageType.ERROR,
-      message: 'Player not in room',
-    };
-    ws.send(JSON.stringify(errorMessage));
-    return;
-  }
 
   if (room.gameState !== GameState.PAUSED) {
-    const errorMessage: ServerMessage = {
-      type: MessageType.ERROR,
-      message: `Cannot resume timer: current state is ${room.gameState}`,
-    };
-    ws.send(JSON.stringify(errorMessage));
+    sendError(ws, `Cannot resume timer: current state is ${room.gameState}`);
     return;
   }
 
@@ -291,26 +265,11 @@ export function handleResumeMessage(ws: WebSocket, message: ResumeMessage): void
 }
 
 export function handleStopMessage(ws: WebSocket, message: StopMessage): void {
+  const validated = validateRoomAndPlayer(ws, message.roomId);
+  if (!validated) return;
+
+  const { room } = validated;
   const normalizedRoomId = normalizeRoomId(message.roomId);
-  const room = rooms.get(normalizedRoomId);
-
-  if (!room) {
-    const errorMessage: ServerMessage = {
-      type: MessageType.ERROR,
-      message: 'Room not found',
-    };
-    ws.send(JSON.stringify(errorMessage));
-    return;
-  }
-
-  if (!isPlayerInRoom(room, message.playerId)) {
-    const errorMessage: ServerMessage = {
-      type: MessageType.ERROR,
-      message: 'Player not in room',
-    };
-    ws.send(JSON.stringify(errorMessage));
-    return;
-  }
 
   room.gameState = GameState.STOPPED;
   room.anchorTime = null;
@@ -324,33 +283,14 @@ export function handleStopMessage(ws: WebSocket, message: StopMessage): void {
 }
 
 export function handleEndTurnMessage(ws: WebSocket, message: EndTurnMessage): void {
+  const validated = validateRoomAndPlayer(ws, message.roomId);
+  if (!validated) return;
+
+  const { room, playerId } = validated;
   const normalizedRoomId = normalizeRoomId(message.roomId);
-  const room = rooms.get(normalizedRoomId);
-
-  if (!room) {
-    const errorMessage: ServerMessage = {
-      type: MessageType.ERROR,
-      message: 'Room not found',
-    };
-    ws.send(JSON.stringify(errorMessage));
-    return;
-  }
-
-  if (!isPlayerInRoom(room, message.playerId)) {
-    const errorMessage: ServerMessage = {
-      type: MessageType.ERROR,
-      message: 'Player not in room',
-    };
-    ws.send(JSON.stringify(errorMessage));
-    return;
-  }
 
   if (room.gameState !== GameState.RUNNING) {
-    const errorMessage: ServerMessage = {
-      type: MessageType.ERROR,
-      message: `Cannot end turn: current state is ${room.gameState}`,
-    };
-    ws.send(JSON.stringify(errorMessage));
+    sendError(ws, `Cannot end turn: current state is ${room.gameState}`);
     return;
   }
 
@@ -362,8 +302,8 @@ export function handleEndTurnMessage(ws: WebSocket, message: EndTurnMessage): vo
   turnDuration += room.accruedPausedTime;
 
   // Add to player's total
-  const currentTotal = room.playerTotals[message.playerId] || 0;
-  room.playerTotals[message.playerId] = currentTotal + turnDuration;
+  const currentTotal = room.playerTotals[playerId] || 0;
+  room.playerTotals[playerId] = currentTotal + turnDuration;
 
   // Reset for next turn
   room.accruedPausedTime = 0;
@@ -374,4 +314,42 @@ export function handleEndTurnMessage(ws: WebSocket, message: EndTurnMessage): vo
     room,
   };
   broadcastToRoom(normalizedRoomId, timerStateUpdate);
+}
+
+export function handleMessage(ws: WebSocket, data: Buffer): void {
+  try {
+    const message = JSON.parse(data.toString()) as ClientMessage;
+
+    switch (message.type) {
+      case MessageType.CREATE_ROOM:
+        handleCreateRoomMessage(ws, message);
+        break;
+      case MessageType.JOIN:
+        handleJoinMessage(ws, message);
+        break;
+      case MessageType.LEAVE:
+        handleLeaveMessage(ws, message);
+        break;
+      case MessageType.START:
+        handleStartMessage(ws, message);
+        break;
+      case MessageType.PAUSE:
+        handlePauseMessage(ws, message);
+        break;
+      case MessageType.RESUME:
+        handleResumeMessage(ws, message);
+        break;
+      case MessageType.STOP:
+        handleStopMessage(ws, message);
+        break;
+      case MessageType.END_TURN:
+        handleEndTurnMessage(ws, message);
+        break;
+      default:
+        throw new Error(`Unknown message type: ${JSON.stringify(message)}`);
+    }
+  } catch (error) {
+    console.error('Error processing message:', error);
+    sendError(ws, 'Invalid message format');
+  }
 }

@@ -87,31 +87,26 @@ export interface RoomCreatedMessage {
 export interface StartMessage {
   type: MessageType.START;
   roomId: string;
-  playerId: string;
 }
 
 export interface PauseMessage {
   type: MessageType.PAUSE;
   roomId: string;
-  playerId: string;
 }
 
 export interface ResumeMessage {
   type: MessageType.RESUME;
   roomId: string;
-  playerId: string;
 }
 
 export interface StopMessage {
   type: MessageType.STOP;
   roomId: string;
-  playerId: string;
 }
 
 export interface EndTurnMessage {
   type: MessageType.END_TURN;
   roomId: string;
-  playerId: string;
 }
 
 export interface TimerStateUpdateMessage {
