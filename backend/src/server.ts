@@ -7,6 +7,11 @@ import {
   handleJoinMessage,
   handleLeaveMessage,
   handleWebSocketClose,
+  handleStartMessage,
+  handlePauseMessage,
+  handleResumeMessage,
+  handleStopMessage,
+  handleEndTurnMessage,
 } from './roomManager.js';
 
 const app = createApp();
@@ -31,6 +36,21 @@ wss.on('connection', (ws: WebSocket) => {
           break;
         case MessageType.LEAVE:
           handleLeaveMessage(ws, message);
+          break;
+        case MessageType.START:
+          handleStartMessage(ws, message);
+          break;
+        case MessageType.PAUSE:
+          handlePauseMessage(ws, message);
+          break;
+        case MessageType.RESUME:
+          handleResumeMessage(ws, message);
+          break;
+        case MessageType.STOP:
+          handleStopMessage(ws, message);
+          break;
+        case MessageType.END_TURN:
+          handleEndTurnMessage(ws, message);
           break;
         default:
           throw new Error(`Unknown message type: ${JSON.stringify(message)}`);

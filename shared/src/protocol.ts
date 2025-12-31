@@ -6,9 +6,19 @@ export interface Player {
   joinedAt: number;
 }
 
+export enum GameState {
+  STOPPED = 'STOPPED',
+  RUNNING = 'RUNNING',
+  PAUSED = 'PAUSED',
+}
+
 export interface Room {
   id: string;
   players: Player[];
+  gameState: GameState;
+  playerTotals: Record<string, number>; // playerId -> total time in ms
+  anchorTime: number | null; // timestamp when current period started
+  accruedPausedTime: number; // accumulated time in ms during current period
 }
 
 // WebSocket message types
@@ -21,6 +31,12 @@ export enum MessageType {
   PLAYER_LEFT = 'player_left',
   ROOM_STATE = 'room_state',
   ERROR = 'error',
+  START = 'start',
+  PAUSE = 'pause',
+  RESUME = 'resume',
+  STOP = 'stop',
+  END_TURN = 'end_turn',
+  TIMER_STATE_UPDATE = 'timer_state_update',
 }
 
 export interface JoinMessage {
@@ -68,10 +84,54 @@ export interface RoomCreatedMessage {
   room: Room;
 }
 
-export type ClientMessage = CreateRoomMessage | JoinMessage | LeaveMessage;
+export interface StartMessage {
+  type: MessageType.START;
+  roomId: string;
+  playerId: string;
+}
+
+export interface PauseMessage {
+  type: MessageType.PAUSE;
+  roomId: string;
+  playerId: string;
+}
+
+export interface ResumeMessage {
+  type: MessageType.RESUME;
+  roomId: string;
+  playerId: string;
+}
+
+export interface StopMessage {
+  type: MessageType.STOP;
+  roomId: string;
+  playerId: string;
+}
+
+export interface EndTurnMessage {
+  type: MessageType.END_TURN;
+  roomId: string;
+  playerId: string;
+}
+
+export interface TimerStateUpdateMessage {
+  type: MessageType.TIMER_STATE_UPDATE;
+  room: Room;
+}
+
+export type ClientMessage =
+  | CreateRoomMessage
+  | JoinMessage
+  | LeaveMessage
+  | StartMessage
+  | PauseMessage
+  | ResumeMessage
+  | StopMessage
+  | EndTurnMessage;
 export type ServerMessage =
   | RoomCreatedMessage
   | PlayerJoinedMessage
   | PlayerLeftMessage
   | RoomStateMessage
-  | ErrorMessage;
+  | ErrorMessage
+  | TimerStateUpdateMessage;
