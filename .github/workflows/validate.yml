@@ -27,12 +27,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
+      - name: Check for JavaScript files (except allowed configs)
+        run: ./scripts/check-no-js-files.sh
+
+      - name: Check file line limits
+        run: ./scripts/check-file-line-limits.sh
 
       - name: Lint
         run: npm run lint
 
-      # Placeholder for future tests
-      # - name: Test
-      #   run: npm test
+      - name: Build
+        run: npm run build
+
+      - name: Test with coverage
+        run: npm test
