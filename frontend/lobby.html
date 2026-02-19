@@ -13,6 +13,22 @@
         <div class="lobby-header">
           <h2>Room: <span id="roomId"></span></h2>
         </div>
+        
+        <!-- Timer Display -->
+        <div class="timer-section">
+          <div class="timer-display">
+            <div class="timer-state">State: <span id="timerState">STOPPED</span></div>
+            <div class="current-time">Current Turn: <span id="currentTime">0.0s</span></div>
+          </div>
+          
+          <!-- Timer Controls -->
+          <div class="timer-controls">
+            <button id="startPauseResumeBtn" class="btn btn-primary">Start</button>
+            <button id="endTurnBtn" class="btn btn-success" disabled>End Turn</button>
+            <button id="stopBtn" class="btn btn-danger" disabled>Stop</button>
+          </div>
+        </div>
+
         <div class="participants">
           <h3>Participants</h3>
           <ul id="playerList" class="player-list"></ul>

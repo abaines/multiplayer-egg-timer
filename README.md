@@ -39,13 +39,25 @@ npm ci
 npm run build
 ```
 
-### Run Backend Server
+### Run the Application
 
 ```bash
 npm run start:backend
 ```
 
 The server runs on `http://localhost:3000` by default.
+The backend serves the built frontend, so you can access the full application at this URL.
+
+### Frontend Development with Hot Reload (Optional)
+
+For active frontend development with hot reload:
+
+```bash
+npm run dev:frontend
+```
+
+This runs Vite's dev server (typically on `http://localhost:5173`) with hot module replacement.
+You'll still need the backend running in a separate terminal for WebSocket functionality.
 
 ### Linting and Formatting
 
