@@ -273,7 +273,10 @@ function leaveRoom() {
 
 // Timer button handlers
 startPauseResumeBtn.addEventListener('click', () => {
-  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
+    updateStatus('Cannot perform action: Not connected to server', 'disconnected');
+    return;
+  }
 
   let messageType: MessageType;
   
@@ -292,7 +295,10 @@ startPauseResumeBtn.addEventListener('click', () => {
 });
 
 endTurnBtn.addEventListener('click', () => {
-  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
+    updateStatus('Cannot end turn: Not connected to server', 'disconnected');
+    return;
+  }
 
   ws.send(JSON.stringify({
     type: MessageType.END_TURN,
@@ -301,7 +307,10 @@ endTurnBtn.addEventListener('click', () => {
 });
 
 stopBtn.addEventListener('click', () => {
-  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
+    updateStatus('Cannot stop timer: Not connected to server', 'disconnected');
+    return;
+  }
 
   ws.send(JSON.stringify({
     type: MessageType.STOP,
