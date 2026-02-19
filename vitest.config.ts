@@ -9,9 +9,9 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
       include: [
-        'backend/src/roomIdGenerator.ts',
-        'shared/src/protocol.ts',
-        'shared/src/index.ts',
+        'backend/src/**/*.{ts,tsx}',
+        'frontend/src/**/*.{ts,tsx}',
+        'shared/src/**/*.{ts,tsx}',
       ],
       exclude: [
         'node_modules/**',
@@ -21,6 +21,14 @@ export default defineConfig({
         '**/*.spec.{ts,tsx}',
         '**/types/**',
         'scripts/**',
+        // Exclude type-only files and files with browser/server dependencies that can't be tested easily
+        'shared/src/protocol.ts',
+        'shared/src/index.ts',
+        'shared/src/version.ts',
+        'backend/src/server.ts',
+        'backend/src/app.ts',
+        'backend/src/roomManager.ts',
+        'frontend/src/**/*',
       ],
       all: true,
       lines: 50,

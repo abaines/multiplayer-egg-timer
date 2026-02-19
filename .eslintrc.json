@@ -25,6 +25,18 @@
   },
   "overrides": [
     {
+      "files": ["**/*.test.ts", "**/*.spec.ts", "vitest.config.ts"],
+      "parserOptions": {
+        "project": null
+      },
+      "rules": {
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-unsafe-member-access": "off",
+        "@typescript-eslint/no-unsafe-call": "off",
+        "@typescript-eslint/no-unsafe-return": "off"
+      }
+    },
+    {
       "files": ["scripts/generate-version.js"],
       "rules": {
         "@typescript-eslint/no-var-requires": "off"
