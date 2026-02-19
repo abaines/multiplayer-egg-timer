@@ -199,10 +199,11 @@ function handleServerMessage(event: MessageEvent) {
         break;
 
       default:
-        console.warn(`Unknown message type: ${JSON.stringify(message)}`);
+        throw new Error(`Unknown message type: ${JSON.stringify(message)}`);
     }
   } catch (error) {
     console.error('Error processing message:', error);
+    throw error;
   }
 }
 
