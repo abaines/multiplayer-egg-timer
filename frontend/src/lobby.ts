@@ -129,10 +129,7 @@ function renderPlayers() {
     nameSpan.textContent = player.name;
 
     const rightInfo = document.createElement('div');
-    rightInfo.style.display = 'flex';
-    rightInfo.style.flexDirection = 'column';
-    rightInfo.style.alignItems = 'flex-end';
-    rightInfo.style.gap = '4px';
+    rightInfo.className = 'player-info-container';
 
     // Show total time if available
     if (currentRoom?.playerTotals && currentRoom.playerTotals[player.id]) {
