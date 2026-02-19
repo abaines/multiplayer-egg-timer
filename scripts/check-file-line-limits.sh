@@ -13,7 +13,12 @@ LARGE_FILES=$(find . -type f \( -name "*.ts" -o -name "*.tsx" \) \
   -not -path "./dist/*" \
   -not -path "./build/*" \
   -not -path "./coverage/*" \
-  -exec sh -c "lines=\$(wc -l < \"\$1\"); if [ \"\$lines\" -gt $MAX_LINES ]; then echo \"\$1 (\$lines lines)\"; fi" _ {} \; \
+  -exec sh -c '
+    lines=$(wc -l < "$1")
+    if [ "$lines" -gt '"$MAX_LINES"' ]; then
+      echo "$1 ($lines lines)"
+    fi
+  ' _ {} \; \
   2>/dev/null || true)
 
 if [ -n "$LARGE_FILES" ]; then
