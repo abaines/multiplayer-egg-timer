@@ -27,12 +27,62 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
+      - name: Check for JavaScript files (except allowed configs)
+        run: |
+          # Find all .js files excluding allowed ones
+          JS_FILES=$(find . -type f -name "*.js" \
+            -not -path "./node_modules/*" \
+            -not -path "./dist/*" \
+            -not -path "./build/*" \
+            -not -path "./coverage/*" \
+            -not -path "./scripts/generate-version.js" \
+            -not -name "*.config.js" \
+            -not -name ".eslintrc.js" \
+            2>/dev/null || true)
+          
+          if [ -n "$JS_FILES" ]; then
+            echo "Error: JavaScript files are not allowed in this project (except config files)."
+            echo "Found the following .js files:"
+            echo "$JS_FILES"
+            exit 1
+          else
+            echo "✓ No unauthorized JavaScript files found"
+          fi
+
+      - name: Check file line limits
+        run: |
+          # Check all TypeScript files for >400 lines
+          LARGE_FILES=$(find . -type f \( -name "*.ts" -o -name "*.tsx" \) \
+            -not -path "./node_modules/*" \
+            -not -path "./dist/*" \
+            -not -path "./build/*" \
+            -not -path "./coverage/*" \
+            -exec sh -c 'lines=$(wc -l < "$1"); if [ "$lines" -gt 400 ]; then echo "$1 ($lines lines)"; fi' _ {} \; \
+            2>/dev/null || true)
+          
+          if [ -n "$LARGE_FILES" ]; then
+            echo "Error: Files exceeding 400 lines found:"
+            echo "$LARGE_FILES"
+            exit 1
+          else
+            echo "✓ All files are within 400 line limit"
+          fi
 
       - name: Lint
         run: npm run lint
 
-      # Placeholder for future tests
-      # - name: Test
-      #   run: npm test
+      - name: Build
+        run: npm run build
+
+      - name: Test with coverage
+        run: npm run test:coverage
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: ./coverage/lcov.info
+          flags: unittests
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
