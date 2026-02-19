@@ -19,6 +19,29 @@
     "@typescript-eslint/no-unsafe-assignment": "error",
     "@typescript-eslint/no-unsafe-member-access": "error",
     "@typescript-eslint/no-unsafe-call": "error",
-    "@typescript-eslint/no-unsafe-return": "error"
-  }
+    "@typescript-eslint/no-unsafe-return": "error",
+    "complexity": ["error", { "max": 10 }],
+    "max-lines": ["error", { "max": 400, "skipBlankLines": true, "skipComments": true }]
+  },
+  "overrides": [
+    {
+      "files": ["scripts/generate-version.js"],
+      "rules": {
+        "@typescript-eslint/no-var-requires": "off"
+      }
+    },
+    {
+      "files": ["*.js"],
+      "excludedFiles": ["scripts/generate-version.js", ".eslintrc.js", "*.config.js"],
+      "rules": {
+        "no-restricted-syntax": [
+          "error",
+          {
+            "selector": "Program",
+            "message": "JavaScript files are not allowed in this project. Please use TypeScript instead. Only config files are permitted."
+          }
+        ]
+      }
+    }
+  ]
 }
