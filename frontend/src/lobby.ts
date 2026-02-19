@@ -86,6 +86,11 @@ function updateButtonStates() {
       endTurnBtn.disabled = true;
       stopBtn.disabled = false;
       break;
+    default:
+      // Fail fast: unknown game state
+      updateStatus(`Error: Unknown game state "${state}"`, 'disconnected');
+      console.error('Unknown game state:', state);
+      break;
   }
 }
 
@@ -284,8 +289,13 @@ startPauseResumeBtn.addEventListener('click', () => {
     messageType = MessageType.START;
   } else if (currentGameState === GameState.RUNNING) {
     messageType = MessageType.PAUSE;
-  } else {
+  } else if (currentGameState === GameState.PAUSED) {
     messageType = MessageType.RESUME;
+  } else {
+    // Fail fast: unknown game state
+    updateStatus(`Error: Cannot determine action for unknown state "${currentGameState}"`, 'disconnected');
+    console.error('Unknown game state in startPauseResumeBtn handler:', currentGameState);
+    return;
   }
 
   ws.send(JSON.stringify({
