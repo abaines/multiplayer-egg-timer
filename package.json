@@ -21,10 +21,9 @@
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,html}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,html}\"",
-    "test": "vitest run",
+    "test": "vitest run --coverage",
     "test:watch": "vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage"
+    "test:ui": "vitest --ui"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.18.2",

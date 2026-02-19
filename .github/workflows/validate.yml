@@ -75,4 +75,4 @@ jobs:
         run: npm run build
 
       - name: Test with coverage
-        run: npm run test:coverage
+        run: npm test
